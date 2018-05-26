@@ -62,7 +62,16 @@ com.github.stone = com.github.stone || {};
       });
     }
 
+    function startSearch() {
+      $btn.addClass("map-search-bar-btn-search");
+    }
+
+    function endSearch() {
+      $btn.removeClass("map-search-bar-btn-search");
+    }
+
     function search() {
+      startSearch();
       var keyword = $input.val().trim();
       if (keyword !== "") {
         var request = {
@@ -85,6 +94,7 @@ com.github.stone = com.github.stone || {};
                 });
               }
 
+              endSearch();
               showSearchResult(places, true);
             } else if (
               status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS
@@ -105,25 +115,36 @@ com.github.stone = com.github.stone || {};
 
     function searchByOpenstreet(keyword) {
       var openstreetUrl = _setting.openstreetUrl + keyword;
-      $.get(openstreetUrl, function(results) {
-        if (results.length > 0) {
-          var places = [];
-          for (var i = 0; i < results.length; i++) {
-            var result = results[i];
-            places.push({
-              name: result.display_name,
-              address: result.display_name,
-              location: {
-                lon: parseFloat(result.lon),
-                lat: parseFloat(result.lat)
-              }
-            });
-          }
 
-          showSearchResult(places, true);
-        } else {
-          console.log("openstreet search empty");
-          showEmptyResult(false);
+      $.ajax({
+        url: openstreetUrl,
+        method: "GET",
+        dataType: "json",
+        success: function(results) {
+          if (results.length > 0) {
+            var places = [];
+            for (var i = 0; i < results.length; i++) {
+              var result = results[i];
+              places.push({
+                name: result.display_name,
+                address: result.display_name,
+                location: {
+                  lon: parseFloat(result.lon),
+                  lat: parseFloat(result.lat)
+                }
+              });
+            }
+
+            endSearch();
+            showSearchResult(places, false);
+          } else {
+            console.log("openstreet search empty");
+            endSearch();
+            showEmptyResult(false);
+          }
+        },
+        error: function() {
+          endSearch();
         }
       });
     }
@@ -162,6 +183,13 @@ com.github.stone = com.github.stone || {};
 
       $panel.append($content);
       $panel.show();
+
+      if (isGoogle) {
+        var $poweredByGoogle = $(
+          "<div class='powered-by-google'><span></span></div>"
+        );
+        $panel.append($poweredByGoogle);
+      }
 
       bindSelectEvent();
     }

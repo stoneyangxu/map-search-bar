@@ -75,3 +75,20 @@
 .map-search-bar-panel-result:hover {
   background-color: #dfdfdf;
 }
+
+.powered-by-google {
+  display: block;
+  width: 480px;
+  height: 24px;
+  line-height: 24px;
+  background-color: #fff;
+}
+
+.powered-by-google span {
+  display: block;
+  background: url(powered_by_google_on_white.png) no-repeat;
+
+  width: 150px;
+  height: 24px;
+  float: right;
+}
