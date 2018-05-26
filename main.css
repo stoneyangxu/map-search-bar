@@ -1,0 +1,18 @@
+.container {
+  display: block;
+
+  position: relative;
+
+  width: 600px;
+  height: 400px;
+
+  background-color: gainsboro;
+
+  margin: 50px;
+}
+
+.custom-map-search-bar {
+  position: absolute;
+  top: 20px;
+  left: 15px;
+}
