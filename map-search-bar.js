@@ -122,7 +122,7 @@ com.github.stone = com.github.stone || {};
                 var result = results[i];
                 places.push({
                   name: result.name,
-                  address: result.formatted_address,
+                  address: result.name + " " + result.formatted_address,
                   location: {
                     lon: result.geometry.location.lng(),
                     lat: result.geometry.location.lat()
