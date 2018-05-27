@@ -10,6 +10,9 @@ com.github.stone = com.github.stone || {};
         placeholder: "Please enter keyword",
         className: "",
         googleMap: null,
+        notFoundText: "Address not found.",
+        searchOnEnter: false,
+        interval: 2000,
         openstreetUrl:
           "https://nominatim.openstreetmap.org/?format=json&addressdetails=0&format=json&limit=10&q=",
         onSelectPlace: function(place) {}
@@ -23,6 +26,10 @@ com.github.stone = com.github.stone || {};
     var $panel = null;
 
     var _googlePlaceService = null;
+
+    var _lastChangedTime = null;
+    var _lastKeyword = null;
+    var _timer = null;
 
     function init() {
       if (_setting.$element) {
@@ -47,19 +54,47 @@ com.github.stone = com.github.stone || {};
       }
 
       bindEvents();
+
+      resetTime();
     }
 
     function bindEvents() {
       $input.keypress(function(e) {
         if (e.which == 13) {
-          //e.preventDefault();
           search();
+          resetTime();
         }
       });
+
+      if (_setting.searchOnEnter) {
+        $input.bind("input", function(e) {
+          resetTime();
+        });
+      }
 
       $btn.click(function(e) {
         search();
       });
+
+      _timer = setInterval(function() {
+        var current = new Date().getTime();
+        if (current - _lastChangedTime > _setting.interval) {
+          if ($input.val() !== _lastKeyword) {
+            console.log("fire auto complete");
+            search();
+          }
+        }
+      }, 500);
+
+      $(window).bind("unload", function() {
+        if (_timer) {
+          clearInterval(_timer);
+        }
+      });
+    }
+
+    function resetTime() {
+      _lastChangedTime = new Date().getTime();
     }
 
     function startSearch() {
@@ -73,6 +108,7 @@ com.github.stone = com.github.stone || {};
     function search() {
       startSearch();
       var keyword = $input.val().trim();
+      _lastKeyword = keyword;
       if (keyword !== "") {
         var request = {
           query: keyword
@@ -101,9 +137,8 @@ com.github.stone = com.github.stone || {};
             ) {
               console.log("google search empty");
               searchByOpenstreet(keyword);
-              // showEmptyResult(true);
             } else {
-              console.log("google search failed");
+              console.log("google search failed", status);
               searchByOpenstreet(keyword);
             }
           });
@@ -155,7 +190,7 @@ com.github.stone = com.github.stone || {};
       var $li = $(
         "<li class='map-search-bar-panel-li map-search-bar-panel-empty'></li>"
       );
-      $li.text("Address not found");
+      $li.text(_setting.notFoundText);
       $content.append($li);
       $panel.append($content);
       $panel.show();
